@@ -23,13 +23,13 @@ jobs:
       with:
         packages: 'platforms;android-33 build-tools;33.0.2 platform-tools'
 
-    - name: Grant execute permission for gradlew
-      run: |
-        gradle wrapper
-        chmod +x gradlew
+    - name: Set up Gradle Stable (8.2) to crush Gradle 9 bugs
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.2'
 
     - name: Build Debug APK
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleDebug --warning-mode all
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
