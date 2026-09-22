@@ -23,10 +23,13 @@ jobs:
       with:
         packages: 'platforms;android-33 build-tools;33.0.2 platform-tools'
 
-    - name: Set up Gradle Stable (8.2) to crush Gradle 9 bugs
+    - name: Set up Gradle Stable (8.2)
       uses: gradle/actions/setup-gradle@v3
       with:
         gradle-version: '8.2'
+
+    - name: Generate Gradle Wrapper
+      run: gradle wrapper --gradle-version 8.2
 
     - name: Build Debug APK
       run: ./gradlew assembleDebug --warning-mode all
