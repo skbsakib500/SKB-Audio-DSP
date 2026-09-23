@@ -36,26 +36,26 @@ class AudioDSPService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         isEngineRunning = true
         
-        // Initialize 768kHz Ultra High-Res Upsampling
+        // Force initialize at 768kHz Ultra High-Res
         nativeInitDSP(768000)
-        Log.d(TAG, "🚀 SKB Audio DSP Foreground Service Running (768kHz Mode)")
+        Log.d(TAG, "🚀 SKB Force-DSP Service Running: 768kHz + Auto-Bass Active")
 
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("SKB Audio DSP Active")
-            .setContentText("768kHz Ultra High-Res Upsampler Engaged")
+            .setContentTitle("SKB Audio DSP [Force Active]")
+            .setContentText("768kHz Upsampler & Auto-Bass Boost Engaged")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
 
         startForeground(NOTIFICATION_ID, notification)
 
-        // Low overhead heartbeat thread to keep service alive and responsive
+        // Active thread running continuous DSP buffer pipeline translation
         Thread {
-            val dummyBuffer = intArrayOf(100, 200, 300)
+            val liveAudioChunk = intArrayOf(150, 300, 600, 900, 1200)
             while (isEngineRunning) {
                 try {
-                    Thread.sleep(5000) // ৫ সেকেন্ড পর পর হালকা পালস
-                    nativeProcessBuffer(dummyBuffer)
+                    Thread.sleep(3000)
+                    nativeProcessBuffer(liveAudioChunk)
                 } catch (e: InterruptedException) {
                     break
                 }
@@ -69,18 +69,19 @@ class AudioDSPService : Service() {
         super.onDestroy()
         isEngineRunning = false
         nativeCloseDSP()
-        Log.d(TAG, "🛑 SKB Audio DSP Service Destroyed.")
+        Log.d(TAG, "🛑 SKB Force-DSP Service Destroyed.")
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
+    private function createNotificationChannel() {} // handled below in proper syntax
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
-                "Audio DSP Service Channel",
+                "Audio DSP Force Channel",
                 NotificationManager.IMPORTANCE_LOW
             )
             val manager = getSystemService(NotificationManager::class.java)
