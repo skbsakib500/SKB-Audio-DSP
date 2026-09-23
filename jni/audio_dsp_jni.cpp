@@ -10,7 +10,7 @@ JNIEXPORT jstring JNICALL
 Java_com_skbdev_audiodsp_AudioDSPService_nativeProcessAudio(
         JNIEnv *env,
         jobject thiz,
-        jjstring inputPath) {
+        jstring inputPath) {
     
     // Future implementation for real-time file/stream processing via Android Service
     std::string result = "[SKB-2070 DSP] Neural Upsampling & 8D Spatial Matrix Applied Successfully on Android Core!";
