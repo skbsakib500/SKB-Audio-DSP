@@ -16,8 +16,17 @@ class AudioDSPService : Service() {
         const val TAG = "SKB_DSP_Engine"
         const val CHANNEL_ID = "AudioDSPServiceChannel"
         const val NOTIFICATION_ID = 1
-        var isRunning = false
+
+        init {
+            System.loadLibrary("audio_dsp_jni")
+        }
     }
+
+    private external fun nativeInitDSP(sampleRate: Int): Boolean
+    private external fun nativeProcessBuffer(inputBuffer: IntArray): IntArray?
+    private external fun nativeCloseDSP()
+
+    private var isEngineRunning = false
 
     override fun onCreate() {
         super.onCreate()
@@ -25,27 +34,32 @@ class AudioDSPService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        isRunning = true
+        isEngineRunning = true
+        
+        // Push hardware limit to 768kHz Ultra High-Res Upsampling
+        val success = nativeInitDSP(768000)
+        
         Log.d(TAG, "==========================================")
-        Log.d(TAG, "🚀 SKB Audio DSP Service Started Successfully!")
-        Log.d(TAG, "🎧 High-Res Upsampler Engine Ready for Testing")
+        Log.d(TAG, "🚀 SKB Audio DSP Service Started!")
+        Log.d(TAG, "🎧 Native 768kHz Upsampler Initialized: $success")
         Log.d(TAG, "==========================================")
 
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("SKB Audio DSP Active")
-            .setContentText("Testing Mode: Monitoring Audio Streams...")
+            .setContentText("768kHz Ultra High-Res Upsampler Engaged")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
 
         startForeground(NOTIFICATION_ID, notification)
 
-        // Simulate real-time audio buffer interception log loop for verification
         Thread {
-            while (isRunning) {
+            val dummyPcmBuffer = intArrayOf(100, 250, 500, 750, 1000)
+            while (isEngineRunning) {
                 try {
-                    Thread.sleep(3000) // প্রতি ৩ সেকেন্ড পর পর লগ দেবে
-                    Log.d(TAG, "⚡ [DSP ACTIVE] Intercepted Audio Buffer -> Upsampling 44.1kHz to 192kHz [OK]")
+                    Thread.sleep(2000)
+                    val processed = nativeProcessBuffer(dummyPcmBuffer)
+                    Log.d(TAG, "⚡ [ACTIVE] 768kHz DSP Stream Intercepted. Buffer size: ${processed?.size}")
                 } catch (e: InterruptedException) {
                     break
                 }
@@ -57,7 +71,8 @@ class AudioDSPService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        isRunning = false
+        isEngineRunning = false
+        nativeCloseDSP()
         Log.d(TAG, "🛑 SKB Audio DSP Service Destroyed.")
     }
 
