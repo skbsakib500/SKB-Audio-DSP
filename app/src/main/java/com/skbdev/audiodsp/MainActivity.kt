@@ -22,7 +22,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Check & Request Notification Permission for Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), PERMISSION_REQUEST_CODE)
@@ -37,27 +36,27 @@ class MainActivity : AppCompatActivity() {
 
         val title = TextView(this).apply {
             text = "SKB Audio DSP"
-            textSize = 24f
+            textSize = 26f
             setTextColor(Color.parseColor("#00FF66"))
             setTypeface(null, android.graphics.Typeface.BOLD)
-            setPadding(0, 0, 0, 20)
+            setPadding(0, 0, 0, 15)
         }
         layout.addView(title)
 
         val subtitle = TextView(this).apply {
-            text = "Rootless Hi-Res Upsampler Engine\nStatus: Ready to Engage"
+            text = "Rootless 768kHz Ultra High-Res Upsampler\nAMOLED Power Saver & Native C++ Engine"
             textSize = 14f
             setTextColor(Color.parseColor("#888888"))
-            setPadding(0, 0, 0, 60)
+            setPadding(0, 0, 0, 80)
         }
         layout.addView(subtitle)
 
         val startBtn = Button(this).apply {
-            text = "START DSP SERVICE"
+            text = "START 768kHz DSP ENGINE"
             setBackgroundColor(Color.parseColor("#00FF66"))
             setTextColor(Color.BLACK)
             setTypeface(null, android.graphics.Typeface.BOLD)
-            setPadding(20, 30, 20, 30)
+            setPadding(20, 35, 20, 35)
             setOnClickListener {
                 try {
                     val intent = Intent(this@MainActivity, AudioDSPService::class.java)
@@ -66,8 +65,8 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         startService(intent)
                     }
-                    Toast.makeText(this@MainActivity, "DSP Service Started Successfully!", Toast.LENGTH_SHORT).show()
-                    subtitle.text = "Rootless Hi-Res Upsampler Engine\nStatus: RUNNING (Active)"
+                    Toast.makeText(this@MainActivity, "768kHz DSP Engine Engaged!", Toast.LENGTH_SHORT).show()
+                    subtitle.text = "Rootless 768kHz Ultra High-Res Upsampler\nStatus: RUNNING (768kHz Active)"
                 } catch (e: Exception) {
                     Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                 }

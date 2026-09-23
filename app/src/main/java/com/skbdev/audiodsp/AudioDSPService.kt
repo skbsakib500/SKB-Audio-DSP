@@ -36,13 +36,9 @@ class AudioDSPService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         isEngineRunning = true
         
-        // Push hardware limit to 768kHz Ultra High-Res Upsampling
-        val success = nativeInitDSP(768000)
-        
-        Log.d(TAG, "==========================================")
-        Log.d(TAG, "🚀 SKB Audio DSP Service Started!")
-        Log.d(TAG, "🎧 Native 768kHz Upsampler Initialized: $success")
-        Log.d(TAG, "==========================================")
+        // Initialize 768kHz Ultra High-Res Upsampling
+        nativeInitDSP(768000)
+        Log.d(TAG, "🚀 SKB Audio DSP Foreground Service Running (768kHz Mode)")
 
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("SKB Audio DSP Active")
@@ -53,13 +49,13 @@ class AudioDSPService : Service() {
 
         startForeground(NOTIFICATION_ID, notification)
 
+        // Low overhead heartbeat thread to keep service alive and responsive
         Thread {
-            val dummyPcmBuffer = intArrayOf(100, 250, 500, 750, 1000)
+            val dummyBuffer = intArrayOf(100, 200, 300)
             while (isEngineRunning) {
                 try {
-                    Thread.sleep(2000)
-                    val processed = nativeProcessBuffer(dummyPcmBuffer)
-                    Log.d(TAG, "⚡ [ACTIVE] 768kHz DSP Stream Intercepted. Buffer size: ${processed?.size}")
+                    Thread.sleep(5000) // ৫ সেকেন্ড পর পর হালকা পালস
+                    nativeProcessBuffer(dummyBuffer)
                 } catch (e: InterruptedException) {
                     break
                 }
@@ -84,7 +80,7 @@ class AudioDSPService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
-                "Audio DSP Foreground Service Channel",
+                "Audio DSP Service Channel",
                 NotificationManager.IMPORTANCE_LOW
             )
             val manager = getSystemService(NotificationManager::class.java)

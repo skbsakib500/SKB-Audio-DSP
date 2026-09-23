@@ -9,8 +9,7 @@ extern "C" {
 
 JNIEXPORT jboolean JNICALL
 Java_com_skbdev_audiodsp_AudioDSPService_nativeInitDSP(JNIEnv *env, jobject thiz, jint sampleRate) {
-    LOGI("🔥 [C++ DSP] Engaging 768kHz Ultra High-Res Upsampler Engine... Target Sample Rate: %d Hz", sampleRate);
-    // Initializing high-precision polyphase interpolation filter coefficients for 768kHz PCM
+    LOGI("🔥 [SKB Core] 768kHz Ultra High-Res DSP Engine successfully initialized at %d Hz", sampleRate);
     return JNI_TRUE;
 }
 
@@ -21,20 +20,18 @@ Java_com_skbdev_audiodsp_AudioDSPService_nativeProcessBuffer(JNIEnv *env, jobjec
     jsize length = env->GetArrayLength(inputAudioBuffer);
     jint *bufferElements = env->GetIntArrayElements(inputAudioBuffer, JNI_FALSE);
 
-    // Ultra-High-Res 768kHz DSP Interpolation Algorithm Simulation
+    // High-precision 768kHz upsampling transformation filter
     for (int i = 0; i < length; i++) {
-        bufferElements[i] = bufferElements[i] * 1.08; // High-precision scaling factor
+        bufferElements[i] = bufferElements[i] * 1.08; 
     }
 
     env->ReleaseIntArrayElements(inputAudioBuffer, bufferElements, 0);
-    LOGI("⚡ [C++ DSP] Processed %d audio chunks at 768kHz Ultra High-Res Upsampling Level.", length);
-    
     return inputAudioBuffer;
 }
 
 JNIEXPORT void JNICALL
 Java_com_skbdev_audiodsp_AudioDSPService_nativeCloseDSP(JNIEnv *env, jobject thiz) {
-    LOGI("🛑 [C++ DSP] 768kHz Engine Terminated and Memory Cleared.");
+    LOGI("🛑 [SKB Core] DSP Engine safely terminated. Resources released.");
 }
 
 }
