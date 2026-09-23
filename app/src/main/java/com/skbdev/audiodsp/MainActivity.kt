@@ -19,6 +19,8 @@ class MainActivity : AppCompatActivity() {
         const val PERMISSION_REQUEST_CODE = 101
     }
 
+    private var isServiceRunning = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -51,28 +53,48 @@ class MainActivity : AppCompatActivity() {
         }
         layout.addView(subtitle)
 
-        val startBtn = Button(this).apply {
+        val toggleBtn = Button(this).apply {
             text = "START 768kHz DSP ENGINE"
             setBackgroundColor(Color.parseColor("#00FF66"))
             setTextColor(Color.BLACK)
             setTypeface(null, android.graphics.Typeface.BOLD)
             setPadding(20, 35, 20, 35)
             setOnClickListener {
-                try {
-                    val intent = Intent(this@MainActivity, AudioDSPService::class.java)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        startForegroundService(intent)
-                    } else {
-                        startService(intent)
+                val intent = Intent(this@MainActivity, AudioDSPService::class.java)
+                if (!isServiceRunning) {
+                    // Start Service
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            startForegroundService(intent)
+                        } else {
+                            startService(intent)
+                        }
+                        isServiceRunning = true
+                        text = "STOP 768kHz DSP ENGINE"
+                        setBackgroundColor(Color.parseColor("#FF3333")) // Red warning color for stop action
+                        setTextColor(Color.WHITE)
+                        subtitle.text = "Rootless 768kHz Ultra High-Res Upsampler\nStatus: RUNNING (768kHz Active)"
+                        Toast.makeText(this@MainActivity, "768kHz DSP Engine Engaged!", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                     }
-                    Toast.makeText(this@MainActivity, "768kHz DSP Engine Engaged!", Toast.LENGTH_SHORT).show()
-                    subtitle.text = "Rootless 768kHz Ultra High-Res Upsampler\nStatus: RUNNING (768kHz Active)"
-                } catch (e: Exception) {
-                    Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                } else {
+                    // Stop Service
+                    try {
+                        stopService(intent)
+                        isServiceRunning = false
+                        text = "START 768kHz DSP ENGINE"
+                        setBackgroundColor(Color.parseColor("#00FF66")) // Neon green for start action
+                        setTextColor(Color.BLACK)
+                        subtitle.text = "Rootless 768kHz Ultra High-Res Upsampler\nStatus: DEACTIVATED (Idle)"
+                        Toast.makeText(this@MainActivity, "DSP Engine Deactivated.", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         }
-        layout.addView(startBtn)
+        layout.addView(toggleBtn)
 
         setContentView(layout)
     }
